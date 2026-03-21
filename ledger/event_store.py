@@ -1,0 +1,160 @@
+import asyncpg
+from typing import AsyncIterator, List, Optional
+
+from ledger.schema.events import BaseEvent, OptimisticConcurrencyError, StoredEvent, StreamMetadata
+
+
+class EventStore:
+	def __init__(self, pool: asyncpg.Pool):
+		self._pool = pool
+
+	async def append(self, stream_id: str, events: List[BaseEvent], expected_version: int, aggregate_type: str) -> int:
+		if not events:
+			return expected_version
+
+		try:
+			async with self._pool.acquire() as conn:
+				async with conn.transaction():
+					row: Optional[asyncpg.Record] = await conn.fetchrow(
+						"""
+						SELECT current_version
+						FROM event_streams
+						WHERE stream_id = $1
+						FOR UPDATE
+						""",
+						stream_id,
+					)
+
+					current_version = int(row["current_version"]) if row else 0
+
+					if expected_version != current_version:
+						raise OptimisticConcurrencyError(
+							expected_version=expected_version,
+							actual_version=current_version,
+							stream_id=stream_id,
+						)
+
+					new_stream_version = current_version + len(events)
+
+					records = []
+					for index, event in enumerate(events, start=1):
+						stream_position = current_version + index
+						event_type = event.__class__.__name__
+						payload = event.model_dump_json()
+						records.append((stream_id, stream_position, event_type, payload))
+
+					await conn.executemany(
+						"""
+						INSERT INTO events (stream_id, stream_position, event_type, payload)
+						VALUES ($1, $2, $3, $4::jsonb)
+						""",
+						records,
+					)
+
+					if current_version == 0:
+						await conn.execute(
+							"""
+							INSERT INTO event_streams (stream_id, aggregate_type, current_version)
+							VALUES ($1, $2, $3)
+							""",
+							stream_id,
+							aggregate_type,
+							new_stream_version,
+						)
+					else:
+						await conn.execute(
+							"""
+							UPDATE event_streams
+							SET current_version = $2
+							WHERE stream_id = $1
+							""",
+							stream_id,
+							new_stream_version,
+						)
+
+					return new_stream_version
+		except asyncpg.PostgresError as exc:
+			raise RuntimeError("Failed to append events to event store.") from exc
+
+	async def load_stream(self, stream_id: str) -> List[StoredEvent]:
+		async with self._pool.acquire() as conn:
+			records = await conn.fetch(
+				"""
+				SELECT *
+				FROM events
+				WHERE stream_id = $1
+				ORDER BY stream_position ASC
+				""",
+				stream_id,
+			)
+
+			return [StoredEvent(**record) for record in records]
+
+
+	async def load_all(
+		self, from_global_position: int = 0, batch_size: int = 500
+	) -> AsyncIterator[StoredEvent]:
+		async with self._pool.acquire() as conn:
+			while True:
+				records = await conn.fetch(
+					"""
+					SELECT *
+					FROM events
+					WHERE global_position > $1
+					ORDER BY global_position ASC
+					LIMIT $2
+					""",
+					from_global_position,
+					batch_size,
+				)
+
+				if not records:
+					break
+
+				for record in records:
+					yield StoredEvent(**record)
+
+
+				from_global_position = int(records[-1]["global_position"])
+
+	async def stream_version(self, stream_id: str) -> int:
+		async with self._pool.acquire() as conn:
+			row: Optional[asyncpg.Record] = await conn.fetchrow(
+				"""
+				SELECT current_version
+				FROM event_streams
+				WHERE stream_id = $1
+				""",
+				stream_id,
+			)
+
+			return int(row["current_version"]) if row else 0
+
+	async def archive_stream(self, stream_id: str) -> None:
+		async with self._pool.acquire() as conn:
+			await conn.execute(
+				"""
+				UPDATE event_streams
+				SET archived_at = NOW()
+				WHERE stream_id = $1
+				""",
+				stream_id,
+			)
+
+	async def get_stream_metadata(self, stream_id: str) -> Optional[StreamMetadata]:
+		async with self._pool.acquire() as conn:
+			row: Optional[asyncpg.Record] = await conn.fetchrow(
+				"""
+				SELECT *
+				FROM event_streams
+				WHERE stream_id = $1
+				""",
+				stream_id,
+			)
+
+			if not row:
+				return None
+
+			return StreamMetadata(**row)
+
+
