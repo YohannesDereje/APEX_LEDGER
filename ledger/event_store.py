@@ -2,7 +2,13 @@ import json
 import asyncpg
 from typing import AsyncIterator, List, Optional
 
-from ledger.schema.events import BaseEvent, OptimisticConcurrencyError, StoredEvent, StreamMetadata
+from ledger.schema.events import (
+	BaseEvent,
+	OptimisticConcurrencyError,
+	OutboxMessage,
+	StoredEvent,
+	StreamMetadata,
+)
 
 
 class EventStore:
@@ -37,40 +43,42 @@ class EventStore:
 					current_version = int(row["current_version"]) if row else 0
 
 					if expected_version != current_version:
-						raise OptimisticConcurrencyError(
-							expected_version=expected_version,
-							actual_version=current_version,
-							stream_id=stream_id,
-						)
+						raise OptimisticConcurrencyError(expected_version, current_version, stream_id)
 
 					new_stream_version = current_version + len(events)
-					metadata = {
-						"correlation_id": correlation_id,
-						"causation_id": causation_id,
-					}
-
-					records = []
 					for index, event in enumerate(events, start=1):
 						stream_position = current_version + index
 						event_type = event.__class__.__name__
 						payload = event.model_dump_json()
-						records.append(
-							(
-								stream_id,
-								stream_position,
-								event_type,
-								payload,
-								json.dumps(metadata),
-							)
-						)
+						event_metadata = {
+							"correlation_id": correlation_id,
+							"causation_id": causation_id,
+						}
 
-					await conn.executemany(
-						"""
-						INSERT INTO events (stream_id, stream_position, event_type, payload, metadata)
-						VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
-						""",
-						records,
-					)
+						inserted = await conn.fetchrow(
+							"""
+							INSERT INTO events (stream_id, stream_position, event_type, payload, metadata)
+							VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
+							RETURNING event_id
+							""",
+							stream_id,
+							stream_position,
+							event_type,
+							payload,
+							json.dumps(event_metadata),
+						)
+						new_event_id = inserted["event_id"]
+
+						if event.destination:
+							await conn.execute(
+								"""
+								INSERT INTO outbox (event_id, destination, payload)
+								VALUES ($1, $2, $3::jsonb)
+								""",
+								new_event_id,
+								event.destination,
+								payload,
+							)
 
 					if current_version == 0:
 						await conn.execute(
@@ -177,5 +185,20 @@ class EventStore:
 				return None
 
 			return StreamMetadata(**row)
+
+	async def get_unpublished_outbox_events(self, limit: int = 100) -> List[OutboxMessage]:
+		async with self._pool.acquire() as conn:
+			records = await conn.fetch(
+				"""
+				SELECT id, event_id, destination, payload
+				FROM outbox
+				WHERE published_at IS NULL
+				ORDER BY created_at ASC
+				LIMIT $1
+				""",
+				limit,
+			)
+
+			return [OutboxMessage(**record) for record in records]
 
 

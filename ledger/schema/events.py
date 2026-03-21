@@ -1,36 +1,43 @@
 import json
 import uuid
+from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # ==============================================================================
 # Custom Exceptions
 # ==============================================================================
 
+@dataclass
 class OptimisticConcurrencyError(Exception):
 	"""
 	Raised when an event store operation fails due to a stream version mismatch.
 	This is an expected error in concurrent systems and should be handled by
 	reloading the aggregate state and retrying the operation.
 	"""
-	def __init__(self, expected_version: int, actual_version: int, stream_id: str):
-		self.expected_version = expected_version
-		self.actual_version = actual_version
-		self.stream_id = stream_id
+	expected_version: int
+	actual_version: int
+	stream_id: str
+
+	def __post_init__(self) -> None:
 		super().__init__(
-			f"Optimistic concurrency conflict on stream '{stream_id}'. "
-			f"Expected version {expected_version}, but found {actual_version}."
+			f"Optimistic concurrency conflict on stream '{self.stream_id}'. "
+			f"Expected version {self.expected_version}, but found {self.actual_version}."
 		)
 
+@dataclass
 class DomainError(Exception):
 	"""
 	Base exception for domain logic violations (e.g., business rule errors).
 	"""
-	pass
+	message: str
+
+	def __post_init__(self) -> None:
+		super().__init__(self.message)
 
 # ==============================================================================
 # Core Event Models
@@ -42,6 +49,7 @@ class BaseEvent(BaseModel):
 	All specific events (e.g., ApplicationSubmitted) will inherit from this.
 	"""
 	model_config = ConfigDict(extra="ignore")
+	destination: Optional[str] = Field(default=None, exclude=True)
 
 	@property
 	def event_type(self) -> str:
@@ -518,12 +526,14 @@ class StreamMetadata(BaseModel):
 	metadata: dict
 	archived_at: Optional[datetime]
 
-	@field_validator("metadata", mode="before")
-	@classmethod
-	def _decode_metadata(cls, value):
-		if isinstance(value, str):
-			return json.loads(value)
-		return value
+
+class OutboxMessage(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
+	id: uuid.UUID
+	event_id: uuid.UUID
+	destination: str
+	payload: dict
 
 
 EVENT_REGISTRY: dict[str, type[BaseEvent]] = {

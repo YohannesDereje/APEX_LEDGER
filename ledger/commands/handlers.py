@@ -53,6 +53,9 @@ async def handle_submit_application(
 	correlation_id: Optional[str] = None,
 	causation_id: Optional[str] = None,
 ) -> None:
+	app = await LoanApplicationAggregate.load(store, cmd.application_id)
+	app.assert_does_not_exist()
+
 	event = ApplicationSubmitted(
 		application_id=cmd.application_id,
 		applicant_id=cmd.applicant_id,
@@ -69,7 +72,7 @@ async def handle_submit_application(
 	await store.append(
 		stream_id=f"loan-{cmd.application_id}",
 		events=[event],
-		expected_version=0,
+		expected_version=app.version,
 		aggregate_type="LoanApplication",
 		correlation_id=correlation_id,
 		causation_id=causation_id,

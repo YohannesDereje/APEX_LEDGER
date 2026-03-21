@@ -96,13 +96,15 @@ class LoanApplicationAggregate:
 
 	def _ensure_status(self, expected_status: ApplicationStatus) -> None:
 		if self.status != expected_status:
-			raise DomainError(
-				f"Application is not in {expected_status.value} state."
-			)
+			raise DomainError(f"Application is not in {expected_status.value} state.")
 
 	def assert_is_submitted(self) -> None:
 		self._ensure_status(ApplicationStatus.SUBMITTED)
 
 	def assert_awaiting_credit_analysis(self) -> None:
 		self._ensure_status(ApplicationStatus.AWAITING_ANALYSIS)
+
+	def assert_does_not_exist(self) -> None:
+		if self.status is not None:
+			raise DomainError("Application already exists.")
 
