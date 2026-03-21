@@ -95,37 +95,54 @@ async def event_store():
 
 @pytest.mark.asyncio
 async def test_double_decision_concurrency(event_store):
-	stream_id = f"loan-concurrency-test-{uuid.uuid4()}"
+    stream_id = f"loan-concurrency-test-{uuid.uuid4()}"
 
-	seed_events = [
-		CreditAnalysisCompleted(decision="approved"),
-		CreditAnalysisCompleted(decision="manual_review"),
-		CreditAnalysisCompleted(decision="approved"),
-	]
-	await event_store.append(
-		stream_id=stream_id,
-		events=seed_events,
-		expected_version=0,
-		aggregate_type="loan",
-	)
+    seed_events = [
+        CreditAnalysisCompleted(decision="approved"),
+        CreditAnalysisCompleted(decision="manual_review"),
+        CreditAnalysisCompleted(decision="approved"),
+    ]
+    await event_store.append(
+        stream_id=stream_id,
+        events=seed_events,
+        expected_version=0,
+        aggregate_type="loan",
+    )
 
-	async def competing_task(task_id: str):
-		return await event_store.append(
-			stream_id=stream_id,
-			events=[CreditAnalysisCompleted(decision=f"decision-{task_id}")],
-			expected_version=3,
-			aggregate_type="loan",
-		)
+    async def competing_task(task_id: str):
+        return await event_store.append(
+            stream_id=stream_id,
+            events=[CreditAnalysisCompleted(decision=f"decision-{task_id}")],
+            expected_version=3,
+            aggregate_type="loan",
+        )
 
-	results = await asyncio.gather(
-		*[competing_task("A"), competing_task("B")],
-		return_exceptions=True,
-	)
+    results = await asyncio.gather(
+        *[competing_task("A"), competing_task("B")],
+        return_exceptions=True,
+    )
 
-	assert isinstance(results[0], OptimisticConcurrencyError) or isinstance(
-		results[1], OptimisticConcurrencyError
-	)
+    winner_version = None
+    loser_error = None
+    for result in results:
+        if isinstance(result, OptimisticConcurrencyError):
+            loser_error = result
+        elif isinstance(result, int):
+            winner_version = result
 
-	final_stream = await event_store.load_stream(stream_id)
-	assert len(final_stream) == 4
-	assert final_stream[3].stream_position == 4
+    final_stream = await event_store.load_stream(stream_id)
+
+    print("\n=== Concurrency Proof Report ===")
+    print(f"Winner found: version advanced to {winner_version}")
+    print(f"Loser found: received OptimisticConcurrencyError -> {loser_error}")
+    print(f"Final stream event count: {len(final_stream)}")
+    print(f"Final event stream_position: {final_stream[3].stream_position}")
+    print("=== End Proof Report ===\n")
+
+    assert isinstance(results[0], OptimisticConcurrencyError) or isinstance(
+        results[1], OptimisticConcurrencyError
+    )
+    assert winner_version is not None
+    assert loser_error is not None
+    assert len(final_stream) == 4
+    assert final_stream[3].stream_position == 4

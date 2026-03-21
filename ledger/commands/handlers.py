@@ -2,6 +2,7 @@ import hashlib
 import json
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -46,7 +47,12 @@ def _hash_input(data: dict) -> str:
 	return hashlib.sha256(json.dumps(data, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
-async def handle_submit_application(cmd: SubmitApplicationCommand, store: EventStore) -> None:
+async def handle_submit_application(
+	cmd: SubmitApplicationCommand,
+	store: EventStore,
+	correlation_id: Optional[str] = None,
+	causation_id: Optional[str] = None,
+) -> None:
 	event = ApplicationSubmitted(
 		application_id=cmd.application_id,
 		applicant_id=cmd.applicant_id,
@@ -65,10 +71,17 @@ async def handle_submit_application(cmd: SubmitApplicationCommand, store: EventS
 		events=[event],
 		expected_version=0,
 		aggregate_type="LoanApplication",
+		correlation_id=correlation_id,
+		causation_id=causation_id,
 	)
 
 
-async def handle_credit_analysis_completed(cmd: CreditAnalysisCompletedCommand, store: EventStore) -> None:
+async def handle_credit_analysis_completed(
+	cmd: CreditAnalysisCompletedCommand,
+	store: EventStore,
+	correlation_id: Optional[str] = None,
+	causation_id: Optional[str] = None,
+) -> None:
 	app = await LoanApplicationAggregate.load(store, cmd.application_id)
 	session = await AgentSessionAggregate.load(store, cmd.session_id)
 
@@ -99,4 +112,6 @@ async def handle_credit_analysis_completed(cmd: CreditAnalysisCompletedCommand, 
 		events=[event],
 		expected_version=app.version,
 		aggregate_type="LoanApplication",
+		correlation_id=correlation_id,
+		causation_id=causation_id,
 	)

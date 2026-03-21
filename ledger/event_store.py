@@ -1,3 +1,4 @@
+import json
 import asyncpg
 from typing import AsyncIterator, List, Optional
 
@@ -8,7 +9,15 @@ class EventStore:
 	def __init__(self, pool: asyncpg.Pool):
 		self._pool = pool
 
-	async def append(self, stream_id: str, events: List[BaseEvent], expected_version: int, aggregate_type: str) -> int:
+	async def append(
+		self,
+		stream_id: str,
+		events: List[BaseEvent],
+		expected_version: int,
+		aggregate_type: str,
+		correlation_id: Optional[str] = None,
+		causation_id: Optional[str] = None,
+	) -> int:
 		if not events:
 			return expected_version
 
@@ -35,18 +44,30 @@ class EventStore:
 						)
 
 					new_stream_version = current_version + len(events)
+					metadata = {
+						"correlation_id": correlation_id,
+						"causation_id": causation_id,
+					}
 
 					records = []
 					for index, event in enumerate(events, start=1):
 						stream_position = current_version + index
 						event_type = event.__class__.__name__
 						payload = event.model_dump_json()
-						records.append((stream_id, stream_position, event_type, payload))
+						records.append(
+							(
+								stream_id,
+								stream_position,
+								event_type,
+								payload,
+								json.dumps(metadata),
+							)
+						)
 
 					await conn.executemany(
 						"""
-						INSERT INTO events (stream_id, stream_position, event_type, payload)
-						VALUES ($1, $2, $3, $4::jsonb)
+						INSERT INTO events (stream_id, stream_position, event_type, payload, metadata)
+						VALUES ($1, $2, $3, $4::jsonb, $5::jsonb)
 						""",
 						records,
 					)

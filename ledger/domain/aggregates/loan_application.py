@@ -4,11 +4,15 @@ from typing import Optional
 
 from ledger.event_store import EventStore
 from ledger.schema.events import (
+	ApplicationDeclined,
 	ApplicationApproved,
 	ApplicationSubmitted,
+	ComplianceCheckRequested,
 	ComplianceCheckCompleted,
 	CreditAnalysisCompleted,
 	CreditAnalysisRequested,
+	DecisionGenerated,
+	DecisionRequested,
 	DomainError,
 	StoredEvent,
 )
@@ -69,8 +73,26 @@ class LoanApplicationAggregate:
 	def _on_CreditAnalysisCompleted(self, event: StoredEvent) -> None:
 		self.status = ApplicationStatus.ANALYSIS_COMPLETE
 
+	def _on_ComplianceCheckRequested(self, event: StoredEvent) -> None:
+		self.status = ApplicationStatus.COMPLIANCE_REVIEW
+
 	def _on_ComplianceCheckCompleted(self, event: StoredEvent) -> None:
 		self.status = ApplicationStatus.PENDING_DECISION
+
+	def _on_DecisionRequested(self, event: StoredEvent) -> None:
+		self.status = ApplicationStatus.PENDING_DECISION
+
+	def _on_DecisionGenerated(self, event: StoredEvent) -> None:
+		recommendation = event.payload.get("recommendation")
+		if recommendation == "APPROVE":
+			self.status = ApplicationStatus.APPROVED_PENDING_HUMAN
+		elif recommendation == "DECLINE":
+			self.status = ApplicationStatus.DECLINED_PENDING_HUMAN
+		else:
+			self.status = ApplicationStatus.PENDING_DECISION
+
+	def _on_ApplicationDeclined(self, event: StoredEvent) -> None:
+		self.status = ApplicationStatus.FINAL_DECLINED
 
 	def _ensure_status(self, expected_status: ApplicationStatus) -> None:
 		if self.status != expected_status:
