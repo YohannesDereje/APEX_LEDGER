@@ -491,6 +491,15 @@ class ApplicationApproved(BaseEvent):
 	approved_at: datetime
 
 
+class AuditIntegrityCheckRun(BaseEvent):
+	entity_type: str
+	entity_id: str
+	events_verified: int
+	previous_hash: str
+	new_hash: str
+	last_checked_global_position: int
+
+
 class StoredEvent(BaseModel):
 	"""
 	Represents an event as it is stored in the database.
@@ -571,5 +580,6 @@ EVENT_REGISTRY: dict[str, type[BaseEvent]] = {
 	DecisionRequested.__name__: DecisionRequested,
 	DecisionGenerated.__name__: DecisionGenerated,
 	ApplicationApproved.__name__: ApplicationApproved,
+	AuditIntegrityCheckRun.__name__: AuditIntegrityCheckRun,
 }
 

@@ -2,6 +2,7 @@ import json
 import asyncpg
 from typing import AsyncIterator, List, Optional
 
+from ledger.events.upcasting import registry
 from ledger.schema.events import (
 	BaseEvent,
 	OptimisticConcurrencyError,
@@ -117,7 +118,7 @@ class EventStore:
 				stream_id,
 			)
 
-			return [StoredEvent(**record) for record in records]
+			return [registry.upcast(StoredEvent(**record)) for record in records]
 
 
 	async def load_all(
@@ -141,7 +142,7 @@ class EventStore:
 					break
 
 				for record in records:
-					yield StoredEvent(**record)
+					yield registry.upcast(StoredEvent(**record))
 
 
 				from_global_position = int(records[-1]["global_position"])
