@@ -41,3 +41,6 @@ __pycache__/
 *.sqlite3
 apex_ledger_test
 
+data/
+documents/
+
