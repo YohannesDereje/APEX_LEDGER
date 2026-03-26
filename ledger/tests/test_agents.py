@@ -24,7 +24,7 @@ from ledger.tests.test_projections import projection_env
 
 @pytest.mark.asyncio
 async def test_full_agent_pipeline_from_credit_to_decision(projection_env):
-    event_store: EventStore = projection_env
+    event_store: EventStore = projection_env["event_store"]
 
     application_id = f"app-{uuid.uuid4()}"
     package_ready = PackageReadyForAnalysis(

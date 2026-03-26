@@ -12,6 +12,15 @@ def _hash_event_payload(event: StoredEvent) -> str:
     return hashlib.sha256(normalized_payload.encode("utf-8")).hexdigest()
 
 
+def _compute_chain_hash(previous_hash: str, events: List[StoredEvent]) -> str:
+    if not events:
+        return previous_hash
+
+    concatenated_event_hashes = "".join(_hash_event_payload(event) for event in events)
+    new_hash_input = f"{previous_hash}{concatenated_event_hashes}"
+    return hashlib.sha256(new_hash_input.encode("utf-8")).hexdigest()
+
+
 async def run_integrity_check(store: EventStore, entity_type: str, entity_id: str):
     primary_stream_id = f"{entity_type}-{entity_id}"
     audit_stream_id = f"audit-{entity_type}-{entity_id}"
@@ -23,11 +32,31 @@ async def run_integrity_check(store: EventStore, entity_type: str, entity_id: st
         if event.event_type == AuditIntegrityCheckRun.__name__
     ]
 
+    chain_valid = True
+    tamper_detected = False
     previous_hash = ""
     last_checked_global_position = 0
     if audit_check_events:
         last_audit = audit_check_events[-1]
-        previous_hash = str(last_audit.payload.get("new_hash", ""))
+        verification_previous_hash = str(last_audit.payload.get("previous_hash", ""))
+        prior_checkpoint = 0
+        if len(audit_check_events) > 1:
+            prior_checkpoint = int(
+                audit_check_events[-2].payload.get("last_checked_global_position", 0)
+            )
+
+        verified_segment: List[StoredEvent] = [
+            event
+            async for event in store.load_all(from_global_position=prior_checkpoint)
+            if event.stream_id == primary_stream_id
+            and int(event.global_position) <= int(last_audit.payload.get("last_checked_global_position", 0))
+        ]
+        expected_last_hash = _compute_chain_hash(verification_previous_hash, verified_segment)
+        stored_last_hash = str(last_audit.payload.get("new_hash", ""))
+        chain_valid = expected_last_hash == stored_last_hash
+        tamper_detected = not chain_valid
+
+        previous_hash = stored_last_hash
         last_checked_global_position = int(
             last_audit.payload.get("last_checked_global_position", 0)
         )
@@ -44,9 +73,7 @@ async def run_integrity_check(store: EventStore, entity_type: str, entity_id: st
         else last_checked_global_position
     )
 
-    concatenated_event_hashes = "".join(_hash_event_payload(event) for event in new_events)
-    new_hash_input = f"{previous_hash}{concatenated_event_hashes}"
-    new_hash = hashlib.sha256(new_hash_input.encode("utf-8")).hexdigest()
+    new_hash = _compute_chain_hash(previous_hash, new_events)
 
     audit_event = AuditIntegrityCheckRun(
         entity_type=entity_type,
@@ -66,7 +93,8 @@ async def run_integrity_check(store: EventStore, entity_type: str, entity_id: st
     )
 
     return {
-        "chain_valid": True,
+        "chain_valid": chain_valid,
+        "tamper_detected": tamper_detected,
         "events_verified": len(new_events),
         "previous_hash": previous_hash,
         "new_hash": new_hash,

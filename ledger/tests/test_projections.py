@@ -80,6 +80,20 @@ async def projection_env():
 
         event_store = EventStore(pool)
         app.state.pool = pool
+        for attr in [
+            "event_store",
+            "application_summary_projection",
+            "agent_performance_projection",
+            "compliance_audit_projection",
+            "daemon",
+            "document_processing_agent_factory",
+            "credit_analysis_agent_factory",
+            "fraud_detection_agent_factory",
+            "compliance_agent_factory",
+            "decision_orchestrator_factory",
+        ]:
+            if hasattr(app.state, attr):
+                delattr(app.state, attr)
 
         yield {
             "event_store": event_store,
@@ -88,8 +102,21 @@ async def projection_env():
         }
 
     finally:
-        if hasattr(app.state, "pool"):
-            del app.state.pool
+        for attr in [
+            "pool",
+            "event_store",
+            "application_summary_projection",
+            "agent_performance_projection",
+            "compliance_audit_projection",
+            "daemon",
+            "document_processing_agent_factory",
+            "credit_analysis_agent_factory",
+            "fraud_detection_agent_factory",
+            "compliance_agent_factory",
+            "decision_orchestrator_factory",
+        ]:
+            if hasattr(app.state, attr):
+                delattr(app.state, attr)
         await pool.close()
         admin_conn = await asyncpg.connect(admin_database_url)
         try:

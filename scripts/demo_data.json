@@ -1,0 +1,460 @@
+[
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 1,
+    "event_type": "ApplicationSubmitted",
+    "payload": {
+      "application_id": "COMP-026",
+      "applicant_id": "apex-bakery-llc",
+      "requested_amount_usd": 250000,
+      "loan_purpose": "WORKING_CAPITAL",
+      "submission_channel": "BROKER_PORTAL"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 2,
+    "event_type": "DocumentUploadRequested",
+    "payload": {
+      "required_document_types": [
+        "BANK_STATEMENTS",
+        "INCOME_STATEMENT",
+        "KYC_PACKET"
+      ],
+      "deadline": "2026-03-25T09:02:14Z"
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 1,
+    "event_type": "PackageCreated",
+    "payload": {
+      "package_id": "pkg-COMP-026",
+      "application_id": "COMP-026",
+      "required_documents": [
+        "BANK_STATEMENTS",
+        "INCOME_STATEMENT",
+        "KYC_PACKET"
+      ]
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 2,
+    "event_type": "DocumentUploaded",
+    "payload": {
+      "document_id": "doc-bank-001",
+      "document_type": "BANK_STATEMENTS",
+      "filename": "bakery-q1-bank.pdf",
+      "uploaded_by": "broker-user-17"
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 3,
+    "event_type": "DocumentUploaded",
+    "payload": {
+      "document_id": "doc-income-001",
+      "document_type": "INCOME_STATEMENT",
+      "filename": "bakery-income-2025.pdf",
+      "uploaded_by": "broker-user-17"
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 4,
+    "event_type": "DocumentUploaded",
+    "payload": {
+      "document_id": "doc-kyc-001",
+      "document_type": "KYC_PACKET",
+      "filename": "bakery-kyc.zip",
+      "uploaded_by": "broker-user-17"
+    }
+  },
+  {
+    "stream_id": "agent-doc-001",
+    "stream_position": 1,
+    "event_type": "AgentSessionStarted",
+    "payload": {
+      "session_id": "agent-doc-001",
+      "agent_type": "DOCUMENT_PROCESSING",
+      "application_id": "COMP-026",
+      "model_version": "refinery-v3.4"
+    }
+  },
+  {
+    "stream_id": "agent-doc-001",
+    "stream_position": 2,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "load_documents",
+      "node_sequence": 1,
+      "output_keys": [
+        "documents"
+      ],
+      "duration_ms": 81
+    }
+  },
+  {
+    "stream_id": "agent-doc-001",
+    "stream_position": 3,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "extract_structured_facts",
+      "node_sequence": 2,
+      "llm_called": true,
+      "duration_ms": 1420
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 5,
+    "event_type": "ExtractionCompleted",
+    "payload": {
+      "package_id": "pkg-COMP-026",
+      "document_id": "doc-income-001",
+      "facts_summary": "Revenue 1.42M, EBITDA margin 14%, no unresolved missing fields"
+    }
+  },
+  {
+    "stream_id": "agent-doc-001",
+    "stream_position": 4,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "write_output",
+      "node_sequence": 3,
+      "output_keys": [
+        "PackageReadyForAnalysis"
+      ],
+      "duration_ms": 93
+    }
+  },
+  {
+    "stream_id": "docpkg-COMP-026",
+    "stream_position": 6,
+    "event_type": "PackageReadyForAnalysis",
+    "payload": {
+      "application_id": "COMP-026",
+      "documents_processed": 3,
+      "has_quality_flags": false
+    }
+  },
+  {
+    "stream_id": "agent-doc-001",
+    "stream_position": 5,
+    "event_type": "AgentSessionCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "total_nodes_executed": 3,
+      "total_cost_usd": 0.17,
+      "next_agent_triggered": "CreditAnalysisAgent"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 3,
+    "event_type": "CreditAnalysisRequested",
+    "payload": {
+      "application_id": "COMP-026",
+      "requested_by": "document-pipeline",
+      "priority": "normal"
+    }
+  },
+  {
+    "stream_id": "agent-credit-001",
+    "stream_position": 1,
+    "event_type": "AgentSessionStarted",
+    "payload": {
+      "session_id": "agent-credit-001",
+      "agent_type": "CREDIT_ANALYSIS",
+      "application_id": "COMP-026",
+      "model_version": "credit-ensemble-v5"
+    }
+  },
+  {
+    "stream_id": "agent-credit-001",
+    "stream_position": 2,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "load_financial_data",
+      "node_sequence": 1,
+      "duration_ms": 67
+    }
+  },
+  {
+    "stream_id": "agent-credit-001",
+    "stream_position": 3,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "analyze_credit_risk",
+      "node_sequence": 2,
+      "llm_called": true,
+      "duration_ms": 1880
+    }
+  },
+  {
+    "stream_id": "credit-COMP-026",
+    "stream_position": 1,
+    "event_type": "CreditAnalysisCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-credit-001",
+      "decision": "APPROVE_WITH_CONDITIONS",
+      "recommended_amount_usd": 225000,
+      "risk_tier": "B"
+    }
+  },
+  {
+    "stream_id": "agent-credit-001",
+    "stream_position": 4,
+    "event_type": "AgentSessionCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "total_nodes_executed": 2,
+      "total_cost_usd": 0.26,
+      "next_agent_triggered": "FraudDetectionAgent"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 4,
+    "event_type": "FraudScreeningRequested",
+    "payload": {
+      "application_id": "COMP-026",
+      "triggered_by_event_id": "credit-COMP-026:1"
+    }
+  },
+  {
+    "stream_id": "agent-fraud-001",
+    "stream_position": 1,
+    "event_type": "AgentSessionStarted",
+    "payload": {
+      "session_id": "agent-fraud-001",
+      "agent_type": "FRAUD_DETECTION",
+      "application_id": "COMP-026",
+      "model_version": "fraud-graph-v2"
+    }
+  },
+  {
+    "stream_id": "agent-fraud-001",
+    "stream_position": 2,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "load_data",
+      "node_sequence": 1,
+      "duration_ms": 41
+    }
+  },
+  {
+    "stream_id": "agent-fraud-001",
+    "stream_position": 3,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "analyze_fraud_risk",
+      "node_sequence": 2,
+      "llm_called": true,
+      "duration_ms": 1210
+    }
+  },
+  {
+    "stream_id": "fraud-COMP-026",
+    "stream_position": 1,
+    "event_type": "FraudScreeningCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-fraud-001",
+      "fraud_score": 0.08,
+      "risk_level": "LOW",
+      "recommendation": "PROCEED"
+    }
+  },
+  {
+    "stream_id": "agent-fraud-001",
+    "stream_position": 4,
+    "event_type": "AgentSessionCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "total_nodes_executed": 2,
+      "total_cost_usd": 0.09,
+      "next_agent_triggered": "ComplianceAgent"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 5,
+    "event_type": "ComplianceCheckRequested",
+    "payload": {
+      "application_id": "COMP-026",
+      "triggered_by_event_id": "fraud-COMP-026:1",
+      "regulation_set_version": "v2026.03"
+    }
+  },
+  {
+    "stream_id": "agent-compliance-001",
+    "stream_position": 1,
+    "event_type": "AgentSessionStarted",
+    "payload": {
+      "session_id": "agent-compliance-001",
+      "agent_type": "COMPLIANCE",
+      "application_id": "COMP-026",
+      "model_version": "policy-pack-2026.03"
+    }
+  },
+  {
+    "stream_id": "agent-compliance-001",
+    "stream_position": 2,
+    "event_type": "AgentNodeExecuted",
+    "payload": {
+      "node_name": "evaluate_rules",
+      "node_sequence": 1,
+      "duration_ms": 510
+    }
+  },
+  {
+    "stream_id": "compliance-COMP-026",
+    "stream_position": 1,
+    "event_type": "ComplianceRulePassed",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-compliance-001",
+      "rule_id": "KYC_SCREENING",
+      "evaluation_notes": "Entity registration and ownership structure matched submitted packet"
+    }
+  },
+  {
+    "stream_id": "compliance-COMP-026",
+    "stream_position": 2,
+    "event_type": "ComplianceRulePassed",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-compliance-001",
+      "rule_id": "SANCTIONS_SCREENING",
+      "evaluation_notes": "No sanctioned parties found across beneficial owners"
+    }
+  },
+  {
+    "stream_id": "compliance-COMP-026",
+    "stream_position": 3,
+    "event_type": "ComplianceRulePassed",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-compliance-001",
+      "rule_id": "DOCUMENT_CONSISTENCY",
+      "evaluation_notes": "Tax IDs and account ownership consistent across all documents"
+    }
+  },
+  {
+    "stream_id": "compliance-COMP-026",
+    "stream_position": 4,
+    "event_type": "ComplianceCheckCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "session_id": "agent-compliance-001",
+      "rules_evaluated": 3,
+      "overall_verdict": "CLEAR"
+    }
+  },
+  {
+    "stream_id": "agent-compliance-001",
+    "stream_position": 3,
+    "event_type": "AgentSessionCompleted",
+    "payload": {
+      "application_id": "COMP-026",
+      "total_nodes_executed": 1,
+      "total_cost_usd": 0.03,
+      "next_agent_triggered": "DecisionOrchestratorAgent"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 6,
+    "event_type": "HumanReviewOverride",
+    "payload": {
+      "application_id": "COMP-026",
+      "reviewer_id": "uw-martinez",
+      "override_reason": "Seasonal revenue dip explained by bakery equipment upgrade and expansion receipts",
+      "manual_adjustment": "approved_amount_raised_to_235000"
+    }
+  },
+  {
+    "stream_id": "audit-COMP-026",
+    "stream_position": 1,
+    "event_type": "run_integrity_check",
+    "payload": {
+      "application_id": "COMP-026",
+      "scope": "document-processing-chain",
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "new_hash": "7d4f3b870de1db31f9349708f2ef7cf4702c38f4b1db90d6396f9f6f1110a4ca"
+    }
+  },
+  {
+    "stream_id": "audit-COMP-026",
+    "stream_position": 2,
+    "event_type": "run_integrity_check",
+    "payload": {
+      "application_id": "COMP-026",
+      "scope": "credit-and-fraud-chain",
+      "previous_hash": "7d4f3b870de1db31f9349708f2ef7cf4702c38f4b1db90d6396f9f6f1110a4ca",
+      "new_hash": "22b15d1adbe857eeaa29c3cb578f19442f5a33ae0e3a4bd47b8f975060fe4979"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 7,
+    "event_type": "DecisionRequested",
+    "payload": {
+      "application_id": "COMP-026",
+      "all_analyses_complete": true,
+      "triggered_by_event_id": "compliance-COMP-026:4"
+    }
+  },
+  {
+    "stream_id": "audit-COMP-026",
+    "stream_position": 3,
+    "event_type": "run_integrity_check",
+    "payload": {
+      "application_id": "COMP-026",
+      "scope": "pre-decision-ledger",
+      "previous_hash": "22b15d1adbe857eeaa29c3cb578f19442f5a33ae0e3a4bd47b8f975060fe4979",
+      "new_hash": "9c0c1da7f2d87983e8d7835c278aa5b02a0b30df47418e1d14f0e37e3f8472d5"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 8,
+    "event_type": "DecisionGenerated",
+    "payload": {
+      "application_id": "COMP-026",
+      "recommendation": "APPROVE",
+      "confidence": 0.92,
+      "approved_amount_usd": 235000,
+      "conditions": [
+        "Monthly borrowing base report",
+        "Business deposit account at Apex"
+      ]
+    }
+  },
+  {
+    "stream_id": "audit-COMP-026",
+    "stream_position": 4,
+    "event_type": "run_integrity_check",
+    "payload": {
+      "application_id": "COMP-026",
+      "scope": "final-approval-chain",
+      "previous_hash": "9c0c1da7f2d87983e8d7835c278aa5b02a0b30df47418e1d14f0e37e3f8472d5",
+      "new_hash": "ec519fdb8f03aeeb5ebd5fc332fe43b8ea0ea98c5e17b7ec2de3e8845d67e31f"
+    }
+  },
+  {
+    "stream_id": "loan-COMP-026",
+    "stream_position": 9,
+    "event_type": "ApplicationApproved",
+    "payload": {
+      "application_id": "COMP-026",
+      "approved_amount_usd": 235000,
+      "interest_rate_pct": 8.15,
+      "approved_by": "decision-orchestrator",
+      "effective_date": "2026-03-26"
+    }
+  }
+]

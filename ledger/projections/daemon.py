@@ -43,11 +43,19 @@ class CheckpointStore:
 
 
 class ProjectionDaemon:
-    def __init__(self, event_store: EventStore, projections: list[Any]):
+    def __init__(
+        self,
+        event_store: EventStore,
+        projections: list[Any],
+        max_retries: int = 3,
+        retry_delay_seconds: float = 1.0,
+    ):
         self._event_store = event_store
         self._projections = {projection.name: projection for projection in projections}
         self._checkpoint_store = CheckpointStore(event_store._pool)
         self._running = True
+        self.max_retries = max_retries
+        self.retry_delay_seconds = retry_delay_seconds
 
     async def run_forever(self, poll_interval_seconds: float = 1.0) -> None:
         while self._running:
@@ -87,6 +95,7 @@ class ProjectionDaemon:
         )
 
         for event in events:
+            skip_event = False
             for projection in self._projections.values():
                 if event.event_type in projection.get_subscribed_event_types():
                     projection_metadata = {
@@ -97,11 +106,42 @@ class ProjectionDaemon:
                         "global_position": event.global_position,
                         "recorded_at": event.recorded_at,
                     }
-                    await projection.handle_event(
-                        event_type=event.event_type,
-                        payload=event.payload,
-                        metadata=projection_metadata,
-                    )
+
+                    attempt = 0
+                    while True:
+                        try:
+                            await projection.handle_event(
+                                event_type=event.event_type,
+                                payload=event.payload,
+                                metadata=projection_metadata,
+                            )
+                            break
+                        except Exception:
+                            projection_name = projection.name
+                            logger.exception(
+                                "Projection '%s' failed for global_position=%s on attempt %s",
+                                projection_name,
+                                event.global_position,
+                                attempt + 1,
+                            )
+
+                            if attempt >= self.max_retries:
+                                logger.critical(
+                                    "Skipping poison pill event for projection '%s' at global_position=%s",
+                                    projection_name,
+                                    event.global_position,
+                                )
+                                skip_event = True
+                                break
+
+                            attempt += 1
+                            await asyncio.sleep(self.retry_delay_seconds)
+
+                    if skip_event:
+                        break
+
+            if skip_event:
+                continue
 
         last_position = int(events[-1].global_position)
         for projection_name in self._projections.keys():

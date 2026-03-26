@@ -122,7 +122,11 @@ class EventStore:
 				stream_id,
 			)
 
-			return [registry.upcast(StoredEvent(**record)) for record in records]
+			upcasted_records: List[StoredEvent] = []
+			for record in records:
+				upcasted_records.append(await registry.upcast(StoredEvent(**record), store=self))
+
+			return upcasted_records
 
 
 	async def load_all(
@@ -146,7 +150,7 @@ class EventStore:
 					break
 
 				for record in records:
-					yield registry.upcast(StoredEvent(**record))
+					yield await registry.upcast(StoredEvent(**record), store=self)
 
 
 				from_global_position = int(records[-1]["global_position"])

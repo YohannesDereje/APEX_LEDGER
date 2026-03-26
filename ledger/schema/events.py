@@ -480,6 +480,13 @@ class DecisionGenerated(BaseEvent):
 	generated_at: datetime
 
 
+class HumanReviewOverride(BaseEvent):
+	application_id: str
+	reviewer_id: str
+	override_reason: str
+	reviewed_at: datetime
+
+
 class ApplicationApproved(BaseEvent):
 	application_id: str
 	approved_amount_usd: Decimal
@@ -579,6 +586,7 @@ EVENT_REGISTRY: dict[str, type[BaseEvent]] = {
 	ApplicationDeclined.__name__: ApplicationDeclined,
 	DecisionRequested.__name__: DecisionRequested,
 	DecisionGenerated.__name__: DecisionGenerated,
+	HumanReviewOverride.__name__: HumanReviewOverride,
 	ApplicationApproved.__name__: ApplicationApproved,
 	AuditIntegrityCheckRun.__name__: AuditIntegrityCheckRun,
 }
