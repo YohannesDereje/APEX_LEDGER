@@ -1,0 +1,68 @@
+{
+    "file_id": "income_statement_2024",
+    "domain_hint": "General",
+    "document_type": "unknown",
+    "metadata": {
+        "overall_origin": "born_digital",
+        "layout_complexity": "Medium",
+        "total_pages": 1,
+        "source_total_pages": 1,
+        "units_count": 1,
+        "escalations": 0,
+        "document_processing_time_ms": 13985.283,
+        "document_estimated_cost_usd": 0.0,
+        "extraction_results": [
+            {
+                "page_number": 1,
+                "origin_type": "born_digital",
+                "attempts": [
+                    {
+                        "strategy": "STRATEGY_C",
+                        "status": "success",
+                        "confidence_score": 0.95,
+                        "processing_time_ms": 13907.197499996983,
+                        "estimated_cost_usd": 0.0,
+                        "prompt_tokens": 301,
+                        "image_tokens": 0,
+                        "completion_tokens": 1200
+                    }
+                ],
+                "final_strategy": "STRATEGY_C",
+                "final_status": "success",
+                "final_confidence_score": 0.95,
+                "escalation_path": "born_digital -> Strategy C (Success)",
+                "cumulative_processing_time_ms": 13907.197,
+                "cumulative_cost_usd": 0.0,
+                "total_cost_usd": 0.0,
+                "final_success_cost_usd": 0.0,
+                "final_vlm_cost_usd": 0.0
+            }
+        ]
+    },
+    "units": [
+        {
+            "uid": "income_statement_2024-p1-vision",
+            "unit_type": "text",
+            "content_raw": "Davis and Sons\nConsolidated Income Statement — Fiscal Year Ended December 31, 2024\n(All amounts in USD — prepared in accordance with US GAAP)\nLine Item FY2024\nRevenue $1,791,981\nCost of Revenue ($1,248,938)\nGross Profit $543,043\nGross Margin % 30.0%\nOperating Expenses ($415,392)\nDepreciation & Amortization ($60,301)\nOperating Income (EBIT) $127,651\nEBITDA $187,952\nEBITDA Margin % 10.0%\nInterest Expense ($74,237)\nIncome Before Tax $53,414\nIncome Tax Expense ($14,939)\nNet Income $38,476\nNet Margin % 2.0%",
+            "content_markdown": "Davis and Sons\nConsolidated Income Statement — Fiscal Year Ended December 31, 2024\n(All amounts in USD — prepared in accordance with US GAAP)\nLine Item FY2024\nRevenue $1,791,981\nCost of Revenue ($1,248,938)\nGross Profit $543,043\nGross Margin % 30.0%\nOperating Expenses ($415,392)\nDepreciation & Amortization ($60,301)\nOperating Income (EBIT) $127,651\nEBITDA $187,952\nEBITDA Margin % 10.0%\nInterest Expense ($74,237)\nIncome Before Tax $53,414\nIncome Tax Expense ($14,939)\nNet Income $38,476\nNet Margin % 2.0%",
+            "bbox": {
+                "x1": 0.0,
+                "y1": 0.0,
+                "x2": 1.0,
+                "y2": 1.0
+            },
+            "provenance": {
+                "source_file": "income_statement_2024.pdf",
+                "page_number": 1,
+                "strategy_used": "STRATEGY_C",
+                "timestamp": "2026-03-26T01:05:40.879857+00:00",
+                "strategy_escalation_path": [
+                    "STRATEGY_C"
+                ],
+                "content_hash": "4d7943ca8b6e5d89b03bcf8654cf7f3e777eea445d686a4b6f1a71c6dfaff8ef"
+            },
+            "content_hash": "916f21fc274df04580ae4451c9eb9290c130737452fb3078640021dace792b01"
+        }
+    ],
+    "page_index": []
+}

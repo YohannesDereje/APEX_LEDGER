@@ -1,18 +1,19 @@
 from typing import Any, TypedDict
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from langgraph.graph import END, START, StateGraph
 
 from ledger.agents.base_agent import BaseApexAgent
 from ledger.domain.aggregates.agent_session import AgentSessionAggregate
 from ledger.event_store import EventStore
-from ledger.refinery.models import ApplicantProfile, Document
+from ledger.refinery.models import ApplicantProfile, Document, FinancialFacts as RefineryFinancialFacts
 from ledger.refinery.pipeline import extract_financial_facts
 from ledger.schema.events import (
     AgentType,
     DocumentType,
     ExtractionCompleted,
-    FinancialFacts,
+    FinancialFacts as EventFinancialFacts,
     PackageReadyForAnalysis,
 )
 
@@ -20,7 +21,7 @@ from ledger.schema.events import (
 class DocumentProcessingState(TypedDict):
     application_id: str
     documents: list[Any]
-    extracted_facts: FinancialFacts | None
+    extracted_facts: Any | None
     quality_assessment: dict[str, Any] | None
     session: AgentSessionAggregate
 
@@ -42,6 +43,81 @@ class DocumentProcessingAgent(BaseApexAgent):
         )
         self.graph = None
         self.build_graph()
+
+    @staticmethod
+    def _coerce_decimal(value: Any, default: str = "0") -> Decimal:
+        if value is None:
+            return Decimal(default)
+        if isinstance(value, Decimal):
+            return value
+        return Decimal(str(value))
+
+    def _event_financial_facts(self, application_id: str, extracted_facts: Any) -> EventFinancialFacts:
+        if isinstance(extracted_facts, EventFinancialFacts):
+            return extracted_facts
+
+        return EventFinancialFacts(
+            total_revenue=self._coerce_decimal(getattr(extracted_facts, "total_revenue", None)),
+            gross_profit=self._coerce_decimal(getattr(extracted_facts, "gross_profit", None)),
+            operating_income=self._coerce_decimal(getattr(extracted_facts, "operating_income", None)),
+            net_income=self._coerce_decimal(getattr(extracted_facts, "net_income", None)),
+            ebitda=self._coerce_decimal(getattr(extracted_facts, "ebitda", None)),
+            interest_expense=self._coerce_decimal(getattr(extracted_facts, "interest_expense", None)),
+            depreciation_amortization=self._coerce_decimal(getattr(extracted_facts, "depreciation_amortization", None)),
+            total_assets=self._coerce_decimal(getattr(extracted_facts, "total_assets", None)),
+            total_liabilities=self._coerce_decimal(getattr(extracted_facts, "total_liabilities", None)),
+            total_equity=self._coerce_decimal(getattr(extracted_facts, "total_equity", None)),
+            cash_and_equivalents=self._coerce_decimal(getattr(extracted_facts, "cash_and_equivalents", None)),
+            current_assets=self._coerce_decimal(getattr(extracted_facts, "current_assets", None)),
+            current_liabilities=self._coerce_decimal(getattr(extracted_facts, "current_liabilities", None)),
+            long_term_debt=self._coerce_decimal(getattr(extracted_facts, "long_term_debt", None)),
+            accounts_receivable=self._coerce_decimal(getattr(extracted_facts, "accounts_receivable", None)),
+            inventory=self._coerce_decimal(getattr(extracted_facts, "inventory", None)),
+            operating_cash_flow=self._coerce_decimal(getattr(extracted_facts, "operating_cash_flow", None)),
+            debt_to_equity=float(getattr(extracted_facts, "debt_to_equity", 0.0) or 0.0),
+            current_ratio=float(getattr(extracted_facts, "current_ratio", 0.0) or 0.0),
+            debt_to_ebitda=float(getattr(extracted_facts, "debt_to_ebitda", 0.0) or 0.0),
+            interest_coverage=float(getattr(extracted_facts, "interest_coverage", 0.0) or 0.0),
+            gross_margin=float(getattr(extracted_facts, "gross_margin", 0.0) or 0.0),
+            net_margin=float(getattr(extracted_facts, "net_margin", 0.0) or 0.0),
+            fiscal_year_end=getattr(extracted_facts, "fiscal_year_end", datetime.now(timezone.utc).date()),
+            field_confidence=getattr(extracted_facts, "field_confidence", {}),
+            page_references=getattr(
+                extracted_facts,
+                "page_references",
+                {
+                    "applicant_id": str(getattr(extracted_facts, "applicant_id", application_id)),
+                    "total_documents": str(getattr(extracted_facts, "total_documents", 0)),
+                    "total_pages": str(getattr(extracted_facts, "total_pages", 0)),
+                    "total_cost_usd": str(getattr(extracted_facts, "total_cost_usd", 0.0)),
+                },
+            ),
+            balance_sheet_balances=bool(getattr(extracted_facts, "balance_sheet_balances", True)),
+        )
+
+    @staticmethod
+    def _raw_text_length(extracted_facts: Any) -> int:
+        if hasattr(extracted_facts, "raw_text_length"):
+            return int(getattr(extracted_facts, "raw_text_length") or 0)
+        extracted_documents = getattr(extracted_facts, "extracted_documents", []) or []
+        return sum(
+            len(getattr(unit, "content_raw", "") or "")
+            for document in extracted_documents
+            for unit in getattr(document, "units", [])
+        )
+
+    @staticmethod
+    def _tables_extracted(extracted_facts: Any) -> int:
+        if hasattr(extracted_facts, "tables_extracted"):
+            return int(getattr(extracted_facts, "tables_extracted") or 0)
+        return int(getattr(extracted_facts, "total_tables_extracted", 0) or 0)
+
+    @staticmethod
+    def _processing_ms(extracted_facts: Any) -> int:
+        if hasattr(extracted_facts, "processing_ms"):
+            return int(getattr(extracted_facts, "processing_ms") or 0)
+        extracted_documents = getattr(extracted_facts, "extracted_documents", []) or []
+        return int(sum(getattr(document, "processing_time_ms", 0) or 0 for document in extracted_documents))
 
     async def _node_validate_inputs(
         self,
@@ -102,6 +178,7 @@ class DocumentProcessingAgent(BaseApexAgent):
         if extracted_facts is not None:
             docpkg_stream_id = f"docpkg-{application_id}"
             expected_version = await self.store.stream_version(docpkg_stream_id)
+            event_financial_facts = self._event_financial_facts(application_id, extracted_facts)
 
             package_id = f"pkg-{application_id}"
             first_document = state["documents"][0] if state["documents"] else None
@@ -116,10 +193,10 @@ class DocumentProcessingAgent(BaseApexAgent):
                 package_id=package_id,
                 document_id=document_id,
                 document_type=DocumentType.INCOME_STATEMENT,
-                facts=extracted_facts,
-                raw_text_length=0,
-                tables_extracted=0,
-                processing_ms=0,
+                facts=event_financial_facts,
+                raw_text_length=self._raw_text_length(extracted_facts),
+                tables_extracted=self._tables_extracted(extracted_facts),
+                processing_ms=self._processing_ms(extracted_facts),
                 completed_at=datetime.now(timezone.utc),
             )
 

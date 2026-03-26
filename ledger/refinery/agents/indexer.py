@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from models import BBox, PageIndex, SemanticChunk
+from ledger.refinery.models import BBox, PageIndex, SemanticChunk
 from ledger.refinery.config import ConfigLoader
 
 try:

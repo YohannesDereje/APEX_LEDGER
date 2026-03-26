@@ -1,0 +1,72 @@
+{
+  "page_number": 1,
+  "bbox": {
+    "x1": 0.0,
+    "y1": 0.0,
+    "x2": 1.0,
+    "y2": 1.0
+  },
+  "node_id": "root",
+  "node_type": "root",
+  "title": "Document Root",
+  "summary": "",
+  "metadata": {
+    "total_chunks": 1,
+    "total_pages_covered": 1,
+    "min_page": 1,
+    "max_page": 1
+  },
+  "chunk_hashes": [],
+  "children": [
+    {
+      "page_number": 1,
+      "bbox": {
+        "x1": 0.0,
+        "y1": 0.0,
+        "x2": 1.0,
+        "y2": 1.0
+      },
+      "node_id": "document-root",
+      "node_type": "section",
+      "title": "Document Root",
+      "summary": "The Consolidated Income Statement for Davis and Sons' fiscal year ended December 31, 2024, reports a net income of $38,476, with key financial metrics including revenue, gross profit, operating income, and EBITDA, all prepared in accordance with US GAAP.",
+      "metadata": {
+        "min_page": 1,
+        "max_page": 1,
+        "chunk_count": 1,
+        "summary": "The Consolidated Income Statement for Davis and Sons' fiscal year ended December 31, 2024, reports a net income of $38,476, with key financial metrics including revenue, gross profit, operating income, and EBITDA, all prepared in accordance with US GAAP.",
+        "total_pages_covered": 1
+      },
+      "chunk_hashes": [
+        "916f21fc274df04580ae4451c9eb9290c130737452fb3078640021dace792b01"
+      ],
+      "children": [
+        {
+          "page_number": 1,
+          "bbox": {
+            "x1": 0.0,
+            "y1": 0.0,
+            "x2": 1.0,
+            "y2": 1.0
+          },
+          "node_id": "chunk/916f21fc274df045",
+          "node_type": "chunk",
+          "title": "Chunk 916f21fc",
+          "summary": "",
+          "metadata": {
+            "content_hash": "916f21fc274df04580ae4451c9eb9290c130737452fb3078640021dace792b01",
+            "token_count": 75,
+            "page_numbers": [
+              1
+            ],
+            "section_context": "Document Root"
+          },
+          "chunk_hashes": [
+            "916f21fc274df04580ae4451c9eb9290c130737452fb3078640021dace792b01"
+          ],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

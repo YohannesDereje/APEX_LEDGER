@@ -9,6 +9,7 @@ import pytest
 from dotenv import load_dotenv
 
 from ledger.event_store import EventStore
+from ledger.mcp.main import app
 from ledger.projections.agent_performance_ledger import AgentPerformanceLedgerProjection
 from ledger.projections.application_summary import ApplicationSummaryProjection
 from ledger.projections.compliance_audit_view import ComplianceAuditViewProjection
@@ -37,10 +38,11 @@ async def projection_env():
             format="text",
         )
 
-    database_url = os.getenv(
+    base_database_url = os.getenv(
         "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost/apex_ledger_test",
+        "postgresql://postgres:postgres@localhost/postgres",
     )
+    database_url = f"{base_database_url.rsplit('/', 1)[0]}/apex_ledger_test"
 
     user_pass_host = database_url.split("://")[1].split("@")[0]
     host = database_url.split("@")[1].split("/")[0]
@@ -76,9 +78,18 @@ async def projection_env():
             with open(projection_schema_path, "r", encoding="utf-8") as projection_schema_file:
                 await conn.execute(projection_schema_file.read())
 
-        yield EventStore(pool)
+        event_store = EventStore(pool)
+        app.state.pool = pool
+
+        yield {
+            "event_store": event_store,
+            "pool": pool,
+            "app": app,
+        }
 
     finally:
+        if hasattr(app.state, "pool"):
+            del app.state.pool
         await pool.close()
         admin_conn = await asyncpg.connect(admin_database_url)
         try:
@@ -95,7 +106,7 @@ async def projection_env():
 
 @pytest.mark.asyncio
 async def test_application_summary_projection(projection_env):
-    event_store = projection_env
+    event_store = projection_env["event_store"]
 
     application_id = f"app-{uuid.uuid4()}"
     event = ApplicationSubmitted(
@@ -135,7 +146,7 @@ async def test_application_summary_projection(projection_env):
 
 @pytest.mark.asyncio
 async def test_application_summary_projection_update(projection_env):
-    event_store = projection_env
+    event_store = projection_env["event_store"]
 
     application_id = f"app-{uuid.uuid4()}"
     submitted_event = ApplicationSubmitted(
@@ -191,7 +202,7 @@ async def test_application_summary_projection_update(projection_env):
 
 @pytest.mark.asyncio
 async def test_compliance_audit_view_temporal_query(projection_env):
-    event_store = projection_env
+    event_store = projection_env["event_store"]
 
     application_id = f"app-{uuid.uuid4()}"
     stream_id = f"loan-{application_id}"

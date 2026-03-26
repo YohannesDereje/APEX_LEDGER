@@ -1,4 +1,5 @@
 import hashlib
+import asyncio
 import json
 from datetime import datetime
 from decimal import Decimal
@@ -6,6 +7,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ledger.agents.document_processor import DocumentProcessingAgent
 from ledger.domain.aggregates.agent_session import AgentSessionAggregate
 from ledger.domain.aggregates.loan_application import LoanApplicationAggregate
 from ledger.event_store import EventStore
@@ -41,6 +43,11 @@ class CreditAnalysisCompletedCommand(BaseModel):
 	completed_at: datetime = Field(default_factory=datetime.utcnow)
 
 	model_config = ConfigDict(extra="ignore")
+
+
+class StartDocumentProcessingCommand(BaseModel):
+	application_id: str
+	documents: list
 
 
 def _hash_input(data: dict) -> str:
@@ -118,3 +125,16 @@ async def handle_credit_analysis_completed(
 		correlation_id=correlation_id,
 		causation_id=causation_id,
 	)
+
+
+async def handle_start_document_processing(
+	cmd: StartDocumentProcessingCommand,
+	store: EventStore,
+) -> None:
+	agent = DocumentProcessingAgent(
+		store=store,
+		agent_id="doc-processor-test",
+		model_version="test-model-v1",
+	)
+	await agent.run(application_id=cmd.application_id, documents=cmd.documents)
+	await asyncio.sleep(0)

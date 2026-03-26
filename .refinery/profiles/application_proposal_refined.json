@@ -1,0 +1,68 @@
+{
+    "file_id": "application_proposal",
+    "domain_hint": "General",
+    "document_type": "unknown",
+    "metadata": {
+        "overall_origin": "born_digital",
+        "layout_complexity": "Medium",
+        "total_pages": 1,
+        "source_total_pages": 1,
+        "units_count": 1,
+        "escalations": 0,
+        "document_processing_time_ms": 18996.392,
+        "document_estimated_cost_usd": 0.0,
+        "extraction_results": [
+            {
+                "page_number": 1,
+                "origin_type": "born_digital",
+                "attempts": [
+                    {
+                        "strategy": "STRATEGY_C",
+                        "status": "success",
+                        "confidence_score": 0.95,
+                        "processing_time_ms": 18899.80680000008,
+                        "estimated_cost_usd": 0.0,
+                        "prompt_tokens": 331,
+                        "image_tokens": 0,
+                        "completion_tokens": 1200
+                    }
+                ],
+                "final_strategy": "STRATEGY_C",
+                "final_status": "success",
+                "final_confidence_score": 0.95,
+                "escalation_path": "born_digital -> Strategy C (Success)",
+                "cumulative_processing_time_ms": 18899.807,
+                "cumulative_cost_usd": 0.0,
+                "total_cost_usd": 0.0,
+                "final_success_cost_usd": 0.0,
+                "final_vlm_cost_usd": 0.0
+            }
+        ]
+    },
+    "units": [
+        {
+            "uid": "application_proposal-p1-vision",
+            "unit_type": "text",
+            "content_raw": "Davis and Sons\nCommercial Loan Application — APEX-PROP-COMP-002\n(All amounts in USD — prepared in accordance with US GAAP)\nLegal Entity Name: Davis and Sons\nBusiness Type: Corp\nIndustry: Retail\nNAICS: 441110\nEIN: 17-9519948\nJurisdiction: OR\nFounded: 2003\nEmployees: 85\nLoan Request\nRequested Amount: $621,927\nPurpose: Working Capital\nUse of Proceeds: fund day-to-day operational expenses and seasonal cash flow\nFinancial Highlights (FY2024)\nMetric FY2024 FY2023\nRevenue $1,791,981 $1,495,515\nEBITDA $187,952 $121,165\nNet Income $38,476 $8,744\nTotal Assets $2,847,526 —\nDebt/EBITDA 9.22x —\nCurrent Ratio 2.17x —",
+            "content_markdown": "# Davis and Sons\n## Commercial Loan Application — APEX-PROP-COMP-002\n*All amounts in USD — prepared in accordance with US GAAP*\n\n### Entity Information\n| Field | Value |\n| :--- | :--- |\n| **Legal Entity Name** | Davis and Sons |\n| **Business Type** | Corp |\n| **Industry** | Retail |\n| **NAICS** | 441110 |\n| **EIN** | 17-9519948 |\n| **Jurisdiction** | OR |\n| **Founded** | 2003 |\n| **Employees** | 85 |\n\n### Loan Request\n| Field | Value |\n| :--- | :--- |\n| **Requested Amount** | $621,927 |\n| **Purpose** | Working Capital |\n| **Use of Proceeds** | Fund day-to-day operational expenses and seasonal cash flow |\n\n### Financial Highlights (FY2024)",
+            "bbox": {
+                "x1": 0.0,
+                "y1": 0.0,
+                "x2": 1.0,
+                "y2": 1.0
+            },
+            "provenance": {
+                "source_file": "application_proposal.pdf",
+                "page_number": 1,
+                "strategy_used": "STRATEGY_C",
+                "timestamp": "2026-03-26T01:04:57.892288+00:00",
+                "strategy_escalation_path": [
+                    "STRATEGY_C"
+                ],
+                "content_hash": "63f10e890f6bdccb2cc06553b819094e0a42ed68acd4c76fe5b404b756c7e71f"
+            },
+            "content_hash": "0d04172bf0f1486a7a18acc94a4c3e18d5f85b1ffa8448de68de55c1a81568f9"
+        }
+    ],
+    "page_index": []
+}

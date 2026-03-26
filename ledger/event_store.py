@@ -104,7 +104,11 @@ class EventStore:
 
 					return new_stream_version
 		except asyncpg.PostgresError as exc:
-			raise RuntimeError("Failed to append events to event store.") from exc
+			print(f"--- REAL DATABASE ERROR ---")
+			print(f"Error Type: {type(exc)}")
+			print(f"Error Details: {exc}")
+			print(f"--------------------------")
+			raise exc
 
 	async def load_stream(self, stream_id: str) -> List[StoredEvent]:
 		async with self._pool.acquire() as conn:

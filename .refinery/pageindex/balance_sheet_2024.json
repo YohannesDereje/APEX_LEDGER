@@ -1,0 +1,72 @@
+{
+  "page_number": 1,
+  "bbox": {
+    "x1": 0.0,
+    "y1": 0.0,
+    "x2": 1.0,
+    "y2": 1.0
+  },
+  "node_id": "root",
+  "node_type": "root",
+  "title": "Document Root",
+  "summary": "",
+  "metadata": {
+    "total_chunks": 1,
+    "total_pages_covered": 1,
+    "min_page": 1,
+    "max_page": 1
+  },
+  "chunk_hashes": [],
+  "children": [
+    {
+      "page_number": 1,
+      "bbox": {
+        "x1": 0.0,
+        "y1": 0.0,
+        "x2": 1.0,
+        "y2": 1.0
+      },
+      "node_id": "document-root",
+      "node_type": "section",
+      "title": "Document Root",
+      "summary": "The Consolidated Balance Sheet for Davis and Sons as of December 31, 2024, reports total assets of $2,847,526, comprising current and non-current assets, and total liabilities and equity of $2,847,526, including accounts payable, long-term debt, and members' equity.",
+      "metadata": {
+        "min_page": 1,
+        "max_page": 1,
+        "chunk_count": 1,
+        "summary": "The Consolidated Balance Sheet for Davis and Sons as of December 31, 2024, reports total assets of $2,847,526, comprising current and non-current assets, and total liabilities and equity of $2,847,526, including accounts payable, long-term debt, and members' equity.",
+        "total_pages_covered": 1
+      },
+      "chunk_hashes": [
+        "6486a4074158733e1c13c1b9161c286942d86b4ecd9c9396f4ff8c37bc99b422"
+      ],
+      "children": [
+        {
+          "page_number": 1,
+          "bbox": {
+            "x1": 0.0,
+            "y1": 0.0,
+            "x2": 1.0,
+            "y2": 1.0
+          },
+          "node_id": "chunk/6486a4074158733e",
+          "node_type": "chunk",
+          "title": "Chunk 6486a407",
+          "summary": "",
+          "metadata": {
+            "content_hash": "6486a4074158733e1c13c1b9161c286942d86b4ecd9c9396f4ff8c37bc99b422",
+            "token_count": 97,
+            "page_numbers": [
+              1
+            ],
+            "section_context": "Document Root"
+          },
+          "chunk_hashes": [
+            "6486a4074158733e1c13c1b9161c286942d86b4ecd9c9396f4ff8c37bc99b422"
+          ],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

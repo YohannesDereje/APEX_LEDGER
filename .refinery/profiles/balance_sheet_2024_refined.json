@@ -1,0 +1,68 @@
+{
+    "file_id": "balance_sheet_2024",
+    "domain_hint": "General",
+    "document_type": "unknown",
+    "metadata": {
+        "overall_origin": "born_digital",
+        "layout_complexity": "Medium",
+        "total_pages": 1,
+        "source_total_pages": 1,
+        "units_count": 1,
+        "escalations": 0,
+        "document_processing_time_ms": 21187.344,
+        "document_estimated_cost_usd": 0.0,
+        "extraction_results": [
+            {
+                "page_number": 1,
+                "origin_type": "born_digital",
+                "attempts": [
+                    {
+                        "strategy": "STRATEGY_C",
+                        "status": "success",
+                        "confidence_score": 0.95,
+                        "processing_time_ms": 21085.324700001365,
+                        "estimated_cost_usd": 0.0,
+                        "prompt_tokens": 386,
+                        "image_tokens": 0,
+                        "completion_tokens": 1200
+                    }
+                ],
+                "final_strategy": "STRATEGY_C",
+                "final_status": "success",
+                "final_confidence_score": 0.95,
+                "escalation_path": "born_digital -> Strategy C (Success)",
+                "cumulative_processing_time_ms": 21085.325,
+                "cumulative_cost_usd": 0.0,
+                "total_cost_usd": 0.0,
+                "final_success_cost_usd": 0.0,
+                "final_vlm_cost_usd": 0.0
+            }
+        ]
+    },
+    "units": [
+        {
+            "uid": "balance_sheet_2024-p1-vision",
+            "unit_type": "text",
+            "content_raw": "Davis and Sons\nConsolidated Balance Sheet — As of December 31, 2024\n(All amounts in USD — prepared in accordance with US GAAP)\nLine Item Dec 31, 2024\nASSETS\nCash and Cash Equivalents $247,132\nAccounts Receivable, net $422,461\nInventory $685,195\nOther Current Assets $10,890\nTotal Current Assets $1,365,679\nProperty, Plant & Equipment, net $1,481,847\nTOTAL ASSETS $2,847,526\nLIABILITIES & EQUITY\nAccounts Payable $283,366\nAccrued Liabilities $188,911\nCurrent Portion LTD $157,426\nTotal Current Liabilities $629,702\nLong-Term Debt $840,803\nOther Long-Term Liabilities $262,041\nTOTAL LIABILITIES $1,732,546\nMembers' / Stockholders' Equity $1,114,980\nTOTAL EQUITY $1,114,980\nTOTAL LIABILITIES & EQUITY $2,847,526",
+            "content_markdown": "Davis and Sons\nConsolidated Balance Sheet — As of December 31, 2024\n(All amounts in USD — prepared in accordance with US GAAP)\nLine Item Dec 31, 2024\nASSETS\nCash and Cash Equivalents $247,132\nAccounts Receivable, net $422,461\nInventory $685,195\nOther Current Assets $10,890\nTotal Current Assets $1,365,679\nProperty, Plant & Equipment, net $1,481,847\nTOTAL ASSETS $2,847,526\nLIABILITIES & EQUITY\nAccounts Payable $283,366\nAccrued Liabilities $188,911\nCurrent Portion LTD $157,426\nTotal Current Liabilities $629,702\nLong-Term Debt $840,803\nOther Long-Term Liabilities $262,041\nTOTAL LIABILITIES $1,732,546\nMembers' / Stockholders' Equity $1,114,980\nTOTAL EQUITY $1,114,980\nTOTAL LIABILITIES & EQUITY $2,847,526",
+            "bbox": {
+                "x1": 0.0,
+                "y1": 0.0,
+                "x2": 1.0,
+                "y2": 1.0
+            },
+            "provenance": {
+                "source_file": "balance_sheet_2024.pdf",
+                "page_number": 1,
+                "strategy_used": "STRATEGY_C",
+                "timestamp": "2026-03-26T01:05:21.614753+00:00",
+                "strategy_escalation_path": [
+                    "STRATEGY_C"
+                ],
+                "content_hash": "5ad58f4b41af6fe7afd65f8bc3b88a67fce600266eaade8ea65ba880f5f54a47"
+            },
+            "content_hash": "6486a4074158733e1c13c1b9161c286942d86b4ecd9c9396f4ff8c37bc99b422"
+        }
+    ],
+    "page_index": []
+}

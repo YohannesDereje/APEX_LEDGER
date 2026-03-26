@@ -1,0 +1,177 @@
+{
+  "page_number": 1,
+  "bbox": {
+    "x1": 0.0,
+    "y1": 0.0,
+    "x2": 1.0,
+    "y2": 1.0
+  },
+  "node_id": "root",
+  "node_type": "root",
+  "title": "Document Root",
+  "summary": "",
+  "metadata": {
+    "total_chunks": 1,
+    "total_pages_covered": 1,
+    "min_page": 1,
+    "max_page": 1
+  },
+  "chunk_hashes": [],
+  "children": [
+    {
+      "page_number": 1,
+      "bbox": {
+        "x1": 0.0,
+        "y1": 0.0,
+        "x2": 1.0,
+        "y2": 1.0
+      },
+      "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information",
+      "node_type": "section",
+      "title": "Davis and Sons\n## Commercial Loan Application \u2014 APEX-PROP-COMP-002\n*All amounts in USD \u2014 prepared in accordance with US GAAP*\n\n### Entity Information",
+      "summary": "Davis and Sons, a retail corporation founded in 2003 in Oregon, is applying for a $621,927 commercial loan to fund working capital and day-to-day operational expenses.",
+      "metadata": {
+        "min_page": 1,
+        "max_page": 1,
+        "chunk_count": 1,
+        "summary": "Davis and Sons, a retail corporation founded in 2003 in Oregon, is applying for a $621,927 commercial loan to fund working capital and day-to-day operational expenses.",
+        "total_pages_covered": 1
+      },
+      "chunk_hashes": [
+        "8e8dd9a528d252b5438d32823337ff33d0ac63c38c00d6fd5f5e81daea54ff28"
+      ],
+      "children": [
+        {
+          "page_number": 1,
+          "bbox": {
+            "x1": 0.0,
+            "y1": 0.0,
+            "x2": 1.0,
+            "y2": 1.0
+          },
+          "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information/field",
+          "node_type": "subsection",
+          "title": "Field",
+          "summary": "",
+          "metadata": {
+            "min_page": 1,
+            "max_page": 1,
+            "chunk_count": 0
+          },
+          "chunk_hashes": [],
+          "children": [
+            {
+              "page_number": 1,
+              "bbox": {
+                "x1": 0.0,
+                "y1": 0.0,
+                "x2": 1.0,
+                "y2": 1.0
+              },
+              "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information/field/value",
+              "node_type": "subsection",
+              "title": "Value",
+              "summary": "",
+              "metadata": {
+                "min_page": 1,
+                "max_page": 1,
+                "chunk_count": 0
+              },
+              "chunk_hashes": [],
+              "children": [
+                {
+                  "page_number": 1,
+                  "bbox": {
+                    "x1": 0.0,
+                    "y1": 0.0,
+                    "x2": 1.0,
+                    "y2": 1.0
+                  },
+                  "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information/field/value/untitled",
+                  "node_type": "subsection",
+                  "title": ":---",
+                  "summary": "",
+                  "metadata": {
+                    "min_page": 1,
+                    "max_page": 1,
+                    "chunk_count": 0
+                  },
+                  "chunk_hashes": [],
+                  "children": [
+                    {
+                      "page_number": 1,
+                      "bbox": {
+                        "x1": 0.0,
+                        "y1": 0.0,
+                        "x2": 1.0,
+                        "y2": 1.0
+                      },
+                      "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information/field/value/untitled/untitled",
+                      "node_type": "subsection",
+                      "title": ":---",
+                      "summary": "",
+                      "metadata": {
+                        "min_page": 1,
+                        "max_page": 1,
+                        "chunk_count": 0
+                      },
+                      "chunk_hashes": [],
+                      "children": [
+                        {
+                          "page_number": 1,
+                          "bbox": {
+                            "x1": 0.0,
+                            "y1": 0.0,
+                            "x2": 1.0,
+                            "y2": 1.0
+                          },
+                          "node_id": "davis-and-sons-commercial-loan-application-apex-prop-comp-002-all-amounts-in-usd-prepared-in-accordance-with-us-gaap-entity-information/field/value/untitled/untitled/legal-enti",
+                          "node_type": "subsection",
+                          "title": "**Legal Enti",
+                          "summary": "",
+                          "metadata": {
+                            "min_page": 1,
+                            "max_page": 1,
+                            "chunk_count": 0
+                          },
+                          "chunk_hashes": [],
+                          "children": [
+                            {
+                              "page_number": 1,
+                              "bbox": {
+                                "x1": 0.0,
+                                "y1": 0.0,
+                                "x2": 1.0,
+                                "y2": 1.0
+                              },
+                              "node_id": "chunk/8e8dd9a528d252b5",
+                              "node_type": "chunk",
+                              "title": "Chunk 8e8dd9a5",
+                              "summary": "",
+                              "metadata": {
+                                "content_hash": "8e8dd9a528d252b5438d32823337ff33d0ac63c38c00d6fd5f5e81daea54ff28",
+                                "token_count": 122,
+                                "page_numbers": [
+                                  1
+                                ],
+                                "section_context": "# Davis and Sons\n## Commercial Loan Application \u2014 APEX-PROP-COMP-002\n*All amounts in USD \u2014 prepared in accordance with US GAAP*\n\n### Entity Information\n| Field | Value |\n| :--- | :--- |\n| **Legal Enti"
+                              },
+                              "chunk_hashes": [
+                                "8e8dd9a528d252b5438d32823337ff33d0ac63c38c00d6fd5f5e81daea54ff28"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -18,7 +18,7 @@ class Orchestrator:
         self,
         rules_path: str | Path = "rubric/extraction_rules.yaml",
         output_root: str | Path = ".refinery",
-        max_pages_per_doc: int = 21,
+        max_pages_per_doc: int = 99,
     ) -> None:
         self.logger = logging.getLogger(__name__)
         self.rules_path = Path(rules_path)
@@ -59,9 +59,17 @@ class Orchestrator:
             or os.getenv("OPENAI_API_KEY")
             or os.getenv("OPENROUTER_API_KEY")
         )
+        model_name = os.getenv("VISION_MODEL_NAME", "qwen/qwen3.5-9b")
+        api_base = (
+            os.getenv("OPENAI_API_BASE")
+            or os.getenv("OPENROUTER_API_BASE")
+            or ("https://openrouter.ai/api/v1" if os.getenv("OPENROUTER_API_KEY") else None)
+        )
 
         extraction_router = ExtractionRouter(
+            model_name=model_name,
             api_key=api_key,
+            api_base=api_base,
             rules_path=self.rules_path,
             max_pages_per_doc=self.max_pages_per_doc,
         )

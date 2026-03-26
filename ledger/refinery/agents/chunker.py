@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Iterable, List
 import warnings
 
-from models import BBox, ExtractedDocument, LDU, PageIndex, SemanticChunk
+from ledger.refinery.models import BBox, ExtractedDocument, LDU, PageIndex, SemanticChunk
 from ledger.refinery.config import ConfigLoader
 from ledger.refinery.utils.hashing import generate_content_hash
 

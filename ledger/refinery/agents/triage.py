@@ -10,7 +10,7 @@ from typing import Any, Iterable, List
 
 import pdfplumber
 
-from models import DocumentProfile, PageProfile
+from ledger.refinery.models import DocumentProfile, PageProfile
 from ledger.refinery.config import ConfigLoader
 
 

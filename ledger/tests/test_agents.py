@@ -1,60 +1,96 @@
-import asyncio
 import uuid
-from unittest.mock import patch
+from datetime import datetime, timezone
 
 import pytest
-from pydantic import BaseModel
 
-from ledger.agents.document_processor import DocumentProcessingAgent
+from ledger.agents.compliance_checker import ComplianceAgent
+from ledger.agents.credit_analyzer import CreditAnalysisAgent
+from ledger.agents.decision_orchestrator import DecisionOrchestratorAgent
+from ledger.agents.fraud_detector import FraudDetectionAgent
 from ledger.event_store import EventStore
-from ledger.schema.events import ExtractionCompleted, FinancialFacts, PackageReadyForAnalysis
+from ledger.projections.agent_performance_ledger import AgentPerformanceLedgerProjection
+from ledger.projections.application_summary import ApplicationSummaryProjection
+from ledger.projections.compliance_audit_view import ComplianceAuditViewProjection
+from ledger.schema.events import (
+    ApplicationApproved,
+    ApplicationDeclined,
+    ComplianceCheckRequested,
+    CreditAnalysisRequested,
+    DecisionGenerated,
+    PackageReadyForAnalysis,
+)
 from ledger.tests.test_projections import projection_env
 
 
-class StartDocumentProcessingCommand(BaseModel):
-    application_id: str
-    documents: list
-
-
-async def handle_start_document_processing(cmd: StartDocumentProcessingCommand, store: EventStore):
-    agent = DocumentProcessingAgent(
-        store=store,
-        agent_id="doc-processor-test",
-        model_version="test-model-v1",
-    )
-    await agent.run(application_id=cmd.application_id, documents=cmd.documents)
-    await asyncio.sleep(0)
-
-
 @pytest.mark.asyncio
-@patch("ledger.agents.document_processor.extract_financial_facts")
-async def test_document_processing_agent_end_to_end(mock_extract_facts, projection_env):
+async def test_full_agent_pipeline_from_credit_to_decision(projection_env):
     event_store: EventStore = projection_env
 
-    fake_financial_facts = FinancialFacts.model_construct(
-        total_revenue=123456,
-    )
-    mock_extract_facts.return_value = fake_financial_facts
-
     application_id = f"app-{uuid.uuid4()}"
-    cmd = StartDocumentProcessingCommand(
+    package_ready = PackageReadyForAnalysis(
+        package_id=f"pkg-{application_id}",
         application_id=application_id,
-        documents=[
-            {
-                "document_id": "doc-income-001",
-                "pdf_path": "income_statement_2025.pdf",
-                "content": "Revenue 123456, Net Income 12000",
-                "filename": "income_statement_2025.pdf",
-                "document_type": "INCOME_STATEMENT",
-            }
-        ],
+        documents_processed=1,
+        has_quality_flags=False,
+        quality_flag_count=0,
+        ready_at=datetime.now(timezone.utc),
+    )
+    await event_store.append(
+        stream_id=f"docpkg-{application_id}",
+        events=[package_ready],
+        expected_version=0,
+        aggregate_type="DocumentPackage",
     )
 
-    await handle_start_document_processing(cmd, event_store)
+    credit_requested = CreditAnalysisRequested(
+        application_id=application_id,
+        requested_at=datetime.now(timezone.utc),
+        requested_by="test-suite",
+        priority="normal",
+    )
+    await event_store.append(
+        stream_id=f"loan-{application_id}",
+        events=[credit_requested],
+        expected_version=0,
+        aggregate_type="LoanApplication",
+    )
 
-    stream = await event_store.load_stream(f"docpkg-{application_id}")
+    credit_analysis_agent = CreditAnalysisAgent(
+        store=event_store,
+        agent_id="credit-analyzer-test",
+        model_version="test-model-v1",
+    )
+    fraud_detection_agent = FraudDetectionAgent(
+        store=event_store,
+        agent_id="fraud-detector-test",
+        model_version="test-model-v1",
+    )
+    compliance_agent = ComplianceAgent(
+        store=event_store,
+        agent_id="compliance-checker-test",
+        model_version="test-model-v1",
+    )
+    decision_orchestrator_agent = DecisionOrchestratorAgent(
+        store=event_store,
+        application_summary_projection=ApplicationSummaryProjection(event_store._pool),
+        agent_performance_projection=AgentPerformanceLedgerProjection(event_store._pool),
+        compliance_audit_projection=ComplianceAuditViewProjection(event_store._pool),
+        agent_id="decision-orchestrator-test",
+        model_version="test-model-v1",
+    )
 
-    assert stream
-    assert stream[-1].event_type == PackageReadyForAnalysis.__name__
-    assert stream[-2].event_type == ExtractionCompleted.__name__
-    assert stream[-2].payload["facts"]["total_revenue"] == fake_financial_facts.total_revenue
+    await credit_analysis_agent.run(application_id=application_id)
+    await fraud_detection_agent.run(application_id=application_id)
+    await compliance_agent.run(application_id=application_id)
+    await decision_orchestrator_agent.run(application_id=application_id)
+
+    loan_stream = await event_store.load_stream(f"loan-{application_id}")
+
+    assert loan_stream[-1].event_type in {
+        ApplicationApproved.__name__,
+        ApplicationDeclined.__name__,
+    }
+    assert loan_stream[-2].event_type == DecisionGenerated.__name__
+    assert any(event.event_type == "FraudScreeningRequested" for event in loan_stream)
+    assert any(event.event_type == ComplianceCheckRequested.__name__ for event in loan_stream)
+    assert any(event.event_type == "DecisionRequested" for event in loan_stream)

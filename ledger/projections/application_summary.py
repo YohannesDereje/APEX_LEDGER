@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 import asyncpg
 
@@ -18,6 +19,18 @@ class ApplicationSummaryProjection:
             ApplicationSubmitted.__name__,
             ApplicationApproved.__name__,
         ]
+
+    async def get_summary(self, application_id: str) -> Optional[dict]:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT * FROM application_summary WHERE application_id = $1",
+                application_id,
+            )
+
+        if row is None:
+            return None
+
+        return dict(row)
 
     async def on_ApplicationSubmitted(self, payload: dict, metadata: dict) -> None:
         recorded_at = metadata.get("recorded_at")

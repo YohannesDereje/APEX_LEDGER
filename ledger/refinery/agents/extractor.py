@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Sequence
 
 import pdfplumber
 
-from models import (
+from ledger.refinery.models import (
     BBox,
     DocumentProfile,
     ExtractedDocument,
@@ -32,6 +32,7 @@ class ExtractionRouter:
     def __init__(
         self,
         api_key: str | None = None,
+        api_base: str | None = None,
         model_name: str | None = None,
         confidence_threshold: float | None = None,
         max_budget: float | None = None,
@@ -70,6 +71,7 @@ class ExtractionRouter:
         self.layout_extractor = LayoutExtractor(rules_path=self.rules_path)
         self.vision_extractor = VisionExtractor(
             api_key=api_key,
+            api_base=api_base,
             model_name=effective_model,
             max_budget=effective_max_budget,
             dpi=self.default_dpi,
